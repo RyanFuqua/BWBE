@@ -1,10 +1,22 @@
 using BWBE;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<TodoDb>(opt => opt.UseInMemoryDatabase("TodoList"));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 var app = builder.Build();
+
+app.MapGet("/", () =>{
+    Ingredients flour = new Ingredients();
+    flour.Id = 1;
+    flour.Name = "Flour";
+    flour.Description = "Milled wheat grain";
+
+    string output = JsonConvert.SerializeObject(flour);
+
+    return output;
+});
 
 app.MapGet("/inventory", async (TodoDb db) =>
     await db.Todos.ToListAsync());
