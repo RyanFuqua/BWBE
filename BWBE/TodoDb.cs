@@ -10,7 +10,7 @@ public class TodoDb : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        //base.OnConfiguring(optionsBuilder);
+        base.OnConfiguring(optionsBuilder);
         //optionsBuilder.UseSqlServer("Server=.\\SQLExpress;Database=tododb;Trusted_Connection=true;TrustServerCertificate=true;");
     }
 
