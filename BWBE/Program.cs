@@ -71,7 +71,7 @@ app.MapDelete("/inventory/{id:int}", async (int id, TodoDb db) =>
 app.MapGet("/recipes", async (TodoDb db) =>
     await db.Todos.ToListAsync());
 
-app.MapGet("/recipes/{Name}", async (string Name, TodoDb db) =>
+app.MapGet("/recipes/{name}", async (string name, TodoDb db) =>
     await db.Todos.Where(s => s.Name == name).ToListAsync()
         is { } todo
         ? Results.Ok(todo)
