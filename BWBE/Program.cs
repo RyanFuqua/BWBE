@@ -1,3 +1,4 @@
+using System.Reflection.Metadata.Ecma335;
 using BWBE;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -7,7 +8,8 @@ builder.Services.AddDbContext<TodoDb>(opt => opt.UseInMemoryDatabase("TodoList")
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 var app = builder.Build();
 
-app.MapGet("/", () =>{
+app.MapGet("/", () =>
+{
     Ingredients flour = new Ingredients();
     flour.Id = 1;
     flour.Name = "Flour";
@@ -21,17 +23,17 @@ app.MapGet("/", () =>{
 app.MapGet("/inventory", async (TodoDb db) =>
     await db.Todos.ToListAsync());
 
-app.MapGet("/inventory/{Name}", async (string Name, TodoDb db) =>
-    await db.Todos.FindAsync(Name)
+app.MapGet("/inventory/{name}", async (string name, TodoDb db) =>
+    await db.Todos.Where(s => s.Name == name).ToListAsync()
         is { } todo
         ? Results.Ok(todo)
-        : Results.NotFound());
+        : Results.NotFound("Sorry, ingredient not found"));
 
 app.MapGet("/inventory/{id:int}", async (int id, TodoDb db) =>
     await db.Todos.FindAsync(id)
         is { } todo
         ? Results.Ok(todo)
-        : Results.NotFound());
+        : Results.NotFound("Sorry, ingredient not found"));
 
 /*
 app.MapPost("/inventory", async (Todo todo, TodoDb db) =>
@@ -70,16 +72,16 @@ app.MapGet("/recipes", async (TodoDb db) =>
     await db.Todos.ToListAsync());
 
 app.MapGet("/recipes/{Name}", async (string Name, TodoDb db) =>
-    await db.Todos.FindAsync(Name)
+    await db.Todos.Where(s => s.Name == name).ToListAsync()
         is { } todo
         ? Results.Ok(todo)
-        : Results.NotFound());
+        : Results.NotFound("Sorry, recipe not found"));
 
 app.MapGet("/recipes/{id:int}", async (int id, TodoDb db) =>
     await db.Todos.FindAsync(id)
         is { } todo
         ? Results.Ok(todo)
-        : Results.NotFound());
+        : Results.NotFound("Sorry, recipe not found"));
 
 /*
 app.MapPost("/recipes", async (Todo todo, TodoDb db) =>
