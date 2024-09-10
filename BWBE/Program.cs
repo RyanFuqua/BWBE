@@ -1,10 +1,16 @@
-using BWBE;
+using BWBE.Data;
+using BWBE.Models;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<TodoDb>(opt => opt.UseInMemoryDatabase("TodoList"));
+builder.Services.AddDbContext<TodoDb>();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.MapGet("/todoitems", async (TodoDb db) =>
     await db.Todos.ToListAsync());
@@ -20,10 +26,11 @@ app.MapGet("/todoitems/{id:int}", async (int id, TodoDb db) =>
 
 app.MapPost("/todoitems", async (Todo todo, TodoDb db) =>
 {
+    Console.WriteLine($"{todo.id}");
     db.Todos.Add(todo);
     await db.SaveChangesAsync();
 
-    return Results.Created($"/todoitems/{todo.Id}", todo);
+    return Results.Created($"/todoitems/{todo.id}", todo);
 });
 
 app.MapPut("/todoitems/{id:int}", async (int id, Todo inputTodo, TodoDb db) =>
