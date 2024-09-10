@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
 using Pomelo.EntityFrameworkCore.MySql.Scaffolding.Internal;
 
 namespace BWBE;
@@ -14,6 +15,14 @@ public partial class BakeryContext : DbContext
     public BakeryContext(DbContextOptions<BakeryContext> options)
         : base(options)
     {
+    }
+
+    private readonly IConfiguration _config;
+
+    public BakeryContext(IConfiguration config)
+    {
+        _config = config;
+        
     }
 
     public virtual DbSet<TblEmail> TblEmails { get; set; }
@@ -37,8 +46,7 @@ public partial class BakeryContext : DbContext
     public virtual DbSet<TblVendor> TblVendors { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseMySql("server=192.241.131.230;user id=jesus;password=ducksRunOnFluffyClouds2180?!;database=Bakery", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.39-mysql"));
+        => optionsBuilder.UseMySql(_config["ConnectionString:DefaultConnection"], Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.39-mysql"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
