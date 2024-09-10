@@ -1,13 +1,32 @@
 using System.Reflection.Metadata.Ecma335;
 using BWBE;
 using Microsoft.EntityFrameworkCore;
+using Pomelo.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<TodoDb>(opt => opt.UseInMemoryDatabase("TodoList"));
+
+var connection = String.Empty;
+var serverVersion = new MySqlServerVersion(new Version(8, 0, 39));
+if (builder.Environment.IsDevelopment())
+{
+    //builder.Configuration.AddEnvironmentVariables().AddJsonFile("appsettings.Development.json");
+    connection = builder.Configuration.GetConnectionString("DefaultConnection");
+}
+else
+{
+    connection = Environment.GetEnvironmentVariable("DefaultConnection");
+}
+
+builder.Services.AddDbContext<BakeryContext>(options => options.UseMySql(connection, serverVersion));
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 var app = builder.Build();
 
+app.MapGet("/users", async (BakeryContext db) =>
+    await db.TblUsers.ToListAsync());
+
+/*
 app.MapGet("/", () =>
 {
     Ingredients flour = new Ingredients();
@@ -35,7 +54,7 @@ app.MapGet("/inventory/{id:int}", async (int id, TodoDb db) =>
         ? Results.Ok(todo)
         : Results.NotFound("Sorry, ingredient not found"));
 
-/*
+
 app.MapPost("/inventory", async (Todo todo, TodoDb db) =>
 {
     db.Todos.Add(todo);
@@ -66,7 +85,7 @@ app.MapDelete("/inventory/{id:int}", async (int id, TodoDb db) =>
     await db.SaveChangesAsync();
     return Results.NoContent();
 });
-*/
+
 
 app.MapGet("/recipes", async (TodoDb db) =>
     await db.Todos.ToListAsync());
