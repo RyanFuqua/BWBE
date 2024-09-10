@@ -8,18 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 var connection = String.Empty;
 var serverVersion = new MySqlServerVersion(new Version(8, 0, 39));
-if (builder.Environment.IsDevelopment())
-{
-    //builder.Configuration.AddEnvironmentVariables().AddJsonFile("appsettings.Development.json");
-    connection = builder.Configuration.GetConnectionString("DefaultConnection");
-}
-else
-{
-    connection = Environment.GetEnvironmentVariable("DefaultConnection");
-}
-
+connection = builder.Configuration["ConnectionString:DefaultConnection"];
 builder.Services.AddDbContext<BakeryContext>(options => options.UseMySql(connection, serverVersion));
-
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 var app = builder.Build();
 

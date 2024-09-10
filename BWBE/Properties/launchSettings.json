@@ -24,12 +24,6 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
-    },
-    "ConnectionString": {
-      "commandName": "Project",
-      "environmentVariables": {
-        "DefaultConnection": "\"Server=192.241.131.230;Port=3306; User ID=jesus; Password=ducksRunOnFluffyClouds2180?!; Database=Bakery\""
-      }
     }
   },
   "$schema": "http://json.schemastore.org/launchsettings.json",
