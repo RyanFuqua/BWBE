@@ -16,6 +16,33 @@ var app = builder.Build();
 app.MapGet("/users", async (BakeryContext db) =>
     await db.TblUsers.ToListAsync());
 
+app.MapGet("/users/EmployeeID:{EmployeeID}", async (string EmployeeID, BakeryContext db) =>
+    await db.TblUsers.Where(s => s.EmployeeId == EmployeeID).ToListAsync()
+        is { } todo
+        ? Results.Ok(todo)
+        : Results.NotFound("Sorry, user not found"));
+
+app.MapGet("/users/Name:{Name}", async (string Name, BakeryContext db) =>
+    await db.TblUsers.Where(s => s.FirstName + " " + s.LastName == Name).ToListAsync()
+        is { } todo
+        ? Results.Ok(todo)
+        : Results.NotFound("Sorry, user not found"));
+
+app.MapGet("/emails", async (BakeryContext db) =>
+    await db.TblEmails.ToListAsync());
+
+app.MapGet("/emailtypes", async (BakeryContext db) =>
+    await db.TblEmailTypes.ToListAsync());
+
+app.MapGet("/phone", async (BakeryContext db) =>
+    await db.TblPhoneNumbers.ToListAsync());
+
+app.MapGet("/phonetypes", async (BakeryContext db) =>
+    await db.TblPhoneTypes.ToListAsync());
+
+app.MapGet("/vendors", async (BakeryContext db) =>
+    await db.TblVendors.ToListAsync());
+
 /*
 app.MapGet("/", () =>
 {
