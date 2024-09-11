@@ -17,14 +17,6 @@ public partial class BakeryContext : DbContext
     {
     }
 
-    private readonly IConfiguration _config;
-
-    public BakeryContext(IConfiguration config)
-    {
-        _config = config;
-        
-    }
-
     public virtual DbSet<TblEmail> TblEmails { get; set; }
 
     public virtual DbSet<TblEmailType> TblEmailTypes { get; set; }
@@ -46,7 +38,7 @@ public partial class BakeryContext : DbContext
     public virtual DbSet<TblVendor> TblVendors { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseMySql(_config["ConnectionString:DefaultConnection"], Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.39-mysql"));
+        => optionsBuilder.UseMySql("name=ConnectionString:DefaultConnection", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.39-mysql"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
