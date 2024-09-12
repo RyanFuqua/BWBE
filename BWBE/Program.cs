@@ -33,6 +33,16 @@ app.MapGet("/users/Name:{Name}", async (string Name, BakeryContext db) =>
         ? Results.Ok(todo)
         : Results.NotFound("Sorry, user not found"));
 
+/* the format for the input should look like this: https:SERVER/users/{PAYLOAD}
+ {PAYLOAD} =
+ {
+    "EmployeeId": "4",
+    "FirstName": "Pluto",
+    "LastName": "Mouse",
+    "Password": "TEST",
+    "Username": "Pluto2024"
+}
+ */
 app.MapPost("/users",
     async (TblUser user, BakeryContext db) => {
         user.Password = "ENCRYPT";
