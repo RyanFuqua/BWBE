@@ -13,6 +13,11 @@ builder.Services.AddDbContext<BakeryContext>(options => options.UseMySql(connect
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 var app = builder.Build();
 
+app.MapGet("/", () =>
+{
+    Console.WriteLine("HIIIIIIIIIIIIIIIIIIIIIIIIIII");
+});
+
 app.MapGet("/users", async (BakeryContext db) =>
     await db.TblUsers.ToListAsync());
 
@@ -27,6 +32,15 @@ app.MapGet("/users/Name:{Name}", async (string Name, BakeryContext db) =>
         is { } todo
         ? Results.Ok(todo)
         : Results.NotFound("Sorry, user not found"));
+
+app.MapPost("/users",
+    async (TblUser user, BakeryContext db) => {
+        user.Password = "ENCRYPT";
+        db.TblUsers.Add(user);
+        await db.SaveChangesAsync();
+
+        return Results.Created($"/users/{user.EmployeeId}", user); 
+    });
 
 app.MapGet("/emails", async (BakeryContext db) =>
     await db.TblEmails.ToListAsync());
