@@ -3,6 +3,9 @@ using BWBE;
 using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore;
 using Newtonsoft.Json;
+using static BCrypt.Net.BCrypt;
+using System.Xml.Linq;
+using System.Data.Entity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,7 +39,6 @@ app.MapGet("/users/Name:{Name}", async (string Name, BakeryContext db) =>
 /* the format for the input should look like this: https:SERVER/users/{PAYLOAD}
  {PAYLOAD} =
  {
-    "EmployeeId": "4",
     "FirstName": "Pluto",
     "LastName": "Mouse",
     "Password": "TEST",
@@ -45,11 +47,21 @@ app.MapGet("/users/Name:{Name}", async (string Name, BakeryContext db) =>
  */
 app.MapPost("/users",
     async (TblUser user, BakeryContext db) => {
-        user.Password = "ENCRYPT";
-        db.TblUsers.Add(user);
-        await db.SaveChangesAsync();
+        var exist = db.TblUsers.Any(e => e.Username == user.Username);
 
-        return Results.Created($"/users/{user.EmployeeId}", user); 
+        if (!exist) {
+            Guid id = Guid.NewGuid();
+            user.EmployeeId = id.ToString();
+            string passHash = HashPassword(user.Password);
+            user.Password = passHash;
+
+            await db.TblUsers.AddAsync(user);
+            await db.SaveChangesAsync();
+
+            return Results.Created($"/users/{user.EmployeeId}", user);
+        }
+
+        return Results.BadRequest("User already exists");
     });
 
 app.MapGet("/emails", async (BakeryContext db) =>
