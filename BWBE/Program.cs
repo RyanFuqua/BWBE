@@ -5,7 +5,6 @@ using Pomelo.EntityFrameworkCore;
 using Newtonsoft.Json;
 using static BCrypt.Net.BCrypt;
 using System.Xml.Linq;
-using System.Data.Entity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,7 +79,7 @@ app.MapPost("/users",
             return Results.Created($"/users/{user.EmployeeId}", user);
         }
 
-        return Results.BadRequest("Error with input");
+        return Results.BadRequest("Error");
     });
 
 app.MapGet("/sessions", async (BakeryContext db) =>
@@ -98,9 +97,10 @@ app.MapGet("/sessions/EmployeeId:{EmployeeId}", async (string EmployeeId, Bakery
 }
  */
 app.MapPost("/sessions", async (TblUser user, BakeryContext db) => {
-    var exist = db.TblUsers.Any(e => e.EmployeeId == user.EmployeeId);
+    var existUser = db.TblUsers.Any(e => e.EmployeeId == user.EmployeeId);
+    var existSession = db.TblSessions.Any(e => e.EmployeeId == user.EmployeeId);
 
-    if (exist) {
+    if (existUser && !existSession) {
         string password = user.Password;
         string username = user.Username;
 
@@ -123,12 +123,16 @@ app.MapPost("/sessions", async (TblUser user, BakeryContext db) => {
             session.LastActivityDateTime = LastActiveDate;
             await db.TblSessions.AddAsync(session);
             await db.SaveChangesAsync();
+            return Results.Accepted();
         }
         else {
             return Results.BadRequest("Password is incorrect");
         }
     }
-    return Results.BadRequest("This user does not exist");
+    else
+    {
+        return Results.BadRequest("Error");
+    }
 });
 
 
