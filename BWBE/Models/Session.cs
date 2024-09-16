@@ -4,12 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BWBE.Models;
 
-[PrimaryKey(nameof(Id), nameof(UserId))]
 public class Session
 {
-    public int Id { get; set; }
-    public int UserId { get; set; }
+    [MaxLength(36)] public string Id { get; set; } = null!;
+    [MaxLength(36)] public string UserId { get; set; } = null!;
 
-    [MaxLength(100)] public string CreationDate { get; set; } = null!;
-    [MaxLength(100)] public string LastActiveDate { get; set; } = null!;
+    public DateTime CreationDate { get; set; }
+    public DateTime LastActiveDate { get; set; }
 }
