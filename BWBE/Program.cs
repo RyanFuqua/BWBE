@@ -48,8 +48,27 @@ app.MapGet("/users/Name:{Name}", async (string Name, BakeryContext db) =>
 app.MapPost("/users",
     async (TblUser user, BakeryContext db) => {
         var exist = db.TblUsers.Any(e => e.Username == user.Username);
-
+        bool blnError = false;
+        if (user.FirstName == null) {
+            blnError = true;
+        }
+        if (user.LastName == null)
+        {
+            blnError = true;
+        }
+        if (user.Password == null)
+        {
+            blnError = true;
+        }
+        if (user.Username == null)
+        {
+            blnError = true;
+        }
         if (!exist) {
+            blnError = true;
+        }
+
+        if (blnError) {
             Guid id = Guid.NewGuid();
             user.EmployeeId = id.ToString();
             string passHash = HashPassword(user.Password);
@@ -61,8 +80,57 @@ app.MapPost("/users",
             return Results.Created($"/users/{user.EmployeeId}", user);
         }
 
-        return Results.BadRequest("User already exists");
+        return Results.BadRequest("Error with input");
     });
+
+app.MapGet("/sessions", async (BakeryContext db) =>
+    await db.TblSessions.ToListAsync());
+
+app.MapGet("/sessions/EmployeeId:{EmployeeId}", async (string EmployeeId, BakeryContext db) =>
+    await db.TblUsers.Where(s => s.EmployeeId == EmployeeId).ToListAsync());
+
+/* the format for the input should look like this: https:SERVER/users/{PAYLOAD}
+ {PAYLOAD} =
+ {
+    "Password": "TEST",
+    "Username": "Pluto2024"
+    "EmployeeId": "3"
+}
+ */
+app.MapPost("/sessions", async (TblUser user, BakeryContext db) => {
+    var exist = db.TblUsers.Any(e => e.EmployeeId == user.EmployeeId);
+
+    if (exist) {
+        string password = user.Password;
+        string username = user.Username;
+
+        TblUser entity = await db.TblUsers.FindAsync(user.EmployeeId);
+
+        string passhash = entity.Password;
+
+        bool verified = Verify(password, passhash);
+
+        if (verified)
+        {
+            string SessionId = Guid.NewGuid().ToString();
+            string EmployeeId = entity.EmployeeId;
+            DateTime CreateDateTime = DateTime.Now;
+            DateTime LastActiveDate = CreateDateTime;
+            TblSession session = new TblSession();
+            session.SessionId = SessionId;
+            session.EmployeeId = EmployeeId;
+            session.CreateDateTime = CreateDateTime;
+            session.LastActivityDateTime = LastActiveDate;
+            await db.TblSessions.AddAsync(session);
+            await db.SaveChangesAsync();
+        }
+        else {
+            return Results.BadRequest("Password is incorrect");
+        }
+    }
+    return Results.BadRequest("This user does not exist");
+});
+
 
 app.MapGet("/emails", async (BakeryContext db) =>
     await db.TblEmails.ToListAsync());
