@@ -31,7 +31,10 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "SERVER_IP": "192.241.131.230",
+        "USERNAME": "ryan",
+        "PASSWORD": "cookiesBakeInHotOvens3814*&"
       }
     }
   }

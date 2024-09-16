@@ -190,4 +190,13 @@ app.MapDelete("/user/{uname}", async (string uname, BakeryCtx db) =>
     return Results.Ok();
 });
 
+app.MapGet("/inventory/{itemID}", async (string itemID, BakeryCtx db) =>
+{
+    if (await.db.InventoryItem.FirstOrDefaultAsync(x => x.ItemID == itemID) is not { } item) return Results.NoContent();
+    
+    //return db.Inventory.FirstOrDefualtAsync(x => x.ItemID == itemID) is not { } item ? Results.NoContent() : Results.Ok(itemID);
+    db.Database.SqlQuery<string>("SELECT * FROM Bakery.InventoryItem WHERE ItemID = @itemID").ToList();
+
+});
+
 app.Run();
