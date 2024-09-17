@@ -190,13 +190,29 @@ app.MapDelete("/user/{uname}", async (string uname, BakeryCtx db) =>
     return Results.Ok();
 });
 
+app.MapGet("/inventory", async (BakeryCtx db) =>
+{
+    return Results.Ok(db.InventoryItem);           
+});
+
 app.MapGet("/inventory/{itemID}", async (string itemID, BakeryCtx db) =>
 {
-    if (await.db.InventoryItem.FirstOrDefaultAsync(x => x.ItemID == itemID) is not { } item) return Results.NoContent();
+    //if (await.db.InventoryItem.FirstOrDefaultAsync(x => x.ItemID == itemID) is not { } item) return Results.NoContent();
     
-    //return db.Inventory.FirstOrDefualtAsync(x => x.ItemID == itemID) is not { } item ? Results.NoContent() : Results.Ok(itemID);
-    db.Database.SqlQuery<string>("SELECT * FROM Bakery.InventoryItem WHERE ItemID = @itemID").ToList();
+    return db.Inventory.FirstOrDefualtAsync(x => x.ID == itemID) is not { } item 
+        ? Results.NoContent() 
+        : Results.Ok(db.Inventory.FirstOrDefualtAsync(x => x.ItemID == itemID));
+    //db.Database.SqlQuery<string>("SELECT * FROM Bakery.InventoryItem WHERE ItemID = @itemID").ToList();
 
 });
+
+app.MapGet("/inventory/{name}", async (string name, BakeryCtx db) =>
+{   
+    return db.Inventory.FirstOrDefaultAsync(x => x.Name == name) is not { } item
+        ? Results.NoContent()
+        : Results.Ok(db.Inventory.FirstOrDefaultAsync(x => x.Name == name));
+}
+// json input 
+app.MapPost("/inventory/{inputs}", async (json)
 
 app.Run();
