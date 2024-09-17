@@ -123,6 +123,16 @@ app.MapGet("/session/search/id/{id}", async (string id, HttpRequest request, Bak
             : Results.NotFound();
 });
 
+app.MapGet("/recipes", async (HttpRequest request, BakeryCtx db) => { 
+    var token = request.Headers.Authorization.ToString();
+
+    return token != Environment.GetEnvironmentVariable("DEV_AUTH_KEY")
+        ? Results.StatusCode(403)
+        : await db.Recipe.ToListAsync() is { } recipe
+            ? Results.Ok(recipe)
+            : Results.NotFound();
+});
+
 app.MapPost("/users", async (UserInit init, BakeryCtx db) =>
 {
     var user = new User
@@ -189,5 +199,6 @@ app.MapDelete("/user/{uname}", async (string uname, BakeryCtx db) =>
 
     return Results.Ok();
 });
+
 
 app.Run();
