@@ -190,29 +190,74 @@ app.MapDelete("/user/{uname}", async (string uname, BakeryCtx db) =>
     return Results.Ok();
 });
 
-app.MapGet("/inventory", async (BakeryCtx db) =>
+app.MapGet("/inventory", async (HttpRequest request, BakeryCtx db) =>
 {
+    var token = request.Headers.Authorization.ToString();
+    if (await GetSession(db, token) is not { } session) return Results.StatusCode(403);
     return Results.Ok(db.InventoryItem);           
 });
 
-app.MapGet("/inventory/{itemID}", async (string itemID, BakeryCtx db) =>
+app.MapGet("/inventory/{itemID}", async (HttpRequest request, string itemID, BakeryCtx db) =>
 {
+    var token = request.Headers.Authorization.ToString();
+    if (await GetSession(db, token) is not { } session) return Results.StatusCode(403);
     //if (await.db.InventoryItem.FirstOrDefaultAsync(x => x.ItemID == itemID) is not { } item) return Results.NoContent();
     
-    return db.Inventory.FirstOrDefualtAsync(x => x.ID == itemID) is not { } item 
+    return await db.InventoryItem.FirstOrDefaultAsync(x => x.ID == itemID) is not { } item 
         ? Results.NoContent() 
-        : Results.Ok(db.Inventory.FirstOrDefualtAsync(x => x.ItemID == itemID));
+        : Results.Ok(await db.InventoryItem.FirstOrDefaultAsync(x => x.ID == itemID));
     //db.Database.SqlQuery<string>("SELECT * FROM Bakery.InventoryItem WHERE ItemID = @itemID").ToList();
 
 });
 
-app.MapGet("/inventory/{name}", async (string name, BakeryCtx db) =>
-{   
-    return db.Inventory.FirstOrDefaultAsync(x => x.Name == name) is not { } item
+app.MapGet("/inventory/{name}", async (HttpRequest request, string name, BakeryCtx db) =>
+{
+    var token = request.Headers.Authorization.ToString();
+    if (await GetSession(db, token) is not { } session) return Results.StatusCode(403);
+    
+    return await db.InventoryItem.FirstOrDefaultAsync(x => x.Name == name) is not { } item
         ? Results.NoContent()
-        : Results.Ok(db.Inventory.FirstOrDefaultAsync(x => x.Name == name));
-}
+        : Results.Ok(await db.InventoryItem.FirstOrDefaultAsync(x => x.Name == name));
+});
 // json input 
-app.MapPost("/inventory/{inputs}", async (json)
+app.MapPost("/inventory/{inputs}", async (HttpRequest request, InventoryItemInit init, BakeryCtx db) =>
+{
+    var token = request.Headers.Authorization.ToString();
+    if (await GetSession(db, token) is not { } session) return Results.StatusCode(403);
+    
+    var inventoryItem = new InventoryItem
+    {
+        ID = Guid.NewGuid().ToString(),
+        Name = init.Name,
+        Quantity = init.Quantity,
+        PurchaseQuantity = init.PurchaseQuantity,
+        CostPerPurchaseUnit = init.CostPerPurchaseUnit,
+        Unit = init.Unit,
+        Notes = init.Notes
+    };
+
+    db.Add(inventoryItem);
+    await db.SaveChangesAsync();
+    
+    return Results.Created(inventoryItem.ID, inventoryItem);
+
+});
+
+app.MapPut("/inventory/{inputs}", async (HttpRequest request, InventoryItemInit init, BakeryCtx db) =>
+{
+    var token = request.Headers.Authorization.ToString();
+    if (await GetSession(db, token) is not { } session) return Results.StatusCode(403);
+    
+    var item =  await db.InventoryItem.FirstOrDefaultAsync(x => x.Name == init.Name);
+    item.Name = (init.Name != null ? init.Name : item.Name);
+    item.Quantity = (init.Quantity != null ? item.Quantity : init.Quantity);
+    item.PurchaseQuantity = (init.PurchaseQuantity != null ? item.PurchaseQuantity : init.PurchaseQuantity);
+    item.CostPerPurchaseUnit = (init.CostPerPurchaseUnit != null ? item.CostPerPurchaseUnit : init.CostPerPurchaseUnit);
+    item.Unit = (init.Unit != null ? init.Unit : item.Unit);
+    item.Notes = (init.Notes != null ? init.Notes : item.Notes);
+
+    await db.SaveChangesAsync();
+    return Results.Ok();
+});
 
 app.Run();

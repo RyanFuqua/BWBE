@@ -2,6 +2,7 @@
 
 public class InventoryItemInit
 {
+    public string Name { get; set; } = null!;
     public int Quantity { get; set; }
     public int PurchaseQuantity { get; set; }
     public float CostPerPurchaseUnit { get; set; }
